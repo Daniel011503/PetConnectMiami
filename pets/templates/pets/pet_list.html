@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pet Connect Miami</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            background-color: #FFF8F0; 
+            color: #2D3436; 
+        }
+        h1 { 
+            color: #74B9FF; 
+            text-align: center; 
+            margin-bottom: 30px; 
+        }
+        .pet-card { 
+            border: 1px solid #A2D2FF; 
+            padding: 20px; 
+            margin: 20px 0; 
+            border-radius: 12px; 
+            background: white;
+            box-shadow: 0 2px 8px rgba(116, 185, 255, 0.1);
+        }
+        .pet-name { 
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #74B9FF; 
+            margin-bottom: 8px;
+        }
+        .pet-name a {
+            text-decoration: none; 
+            color: #74B9FF;
+        }
+        .pet-name a:hover {
+            color: #FF9F80;
+        }
+        .pet-breed { 
+            color: #34495E; 
+            font-style: italic; 
+            font-size: 16px;
+        }
+        .pet-age { 
+            color: #FF6B6B; 
+            font-weight: 500;
+            margin: 10px 0;
+        }
+        .pet-card p {
+            color: #2D3436;
+            line-height: 1.5;
+        }
+        .pet-card small {
+            color: #34495E;
+            background: #B2F7EF;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pet Connect Miami - All Pets</h1>
+    
+    {% for pet in pets %}
+        <div class="pet-card">
+            {% if pet.photo %}
+                <img src="{{ pet.photo.url }}" alt="{{ pet.name }}" style="width: 150px; height: 150px; object-fit: cover; border-radius: 12px; float: right; margin-left: 20px;">
+            {% endif %}
+            <div class="pet-name"><a href="/pets/{{ pet.id }}/" style="text-decoration: none; color: #74B9FF;">{{ pet.name }}</a></div>
+            <div class="pet-breed">{{ pet.breed }}</div>
+            <div class="pet-age">Age: {{ pet.age }} years old</div>
+            <p>{{ pet.description }}</p>
+            <small>Owner: {{ pet.owner.username }}</small>
+        </div>
+    {% empty %}
+        <p>No pets found!</p>
+    {% endfor %}
+</body>
+</html>
