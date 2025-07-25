@@ -12,3 +12,27 @@ class PetForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Tell us about your pet\'s personality...'}),
             'photo': forms.FileInput(attrs={'class': 'form-control'}),
         }
+
+class PetSearchForm(forms.Form):
+    search = forms.CharField(
+        max_length=100, 
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Search by name or breed...',
+            'class': 'search-input'
+        })
+    )
+    age_min = forms.IntegerField(
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'placeholder': 'Min age',
+            'class': 'age-input'
+        })
+    )
+    age_max = forms.IntegerField(
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'placeholder': 'Max age', 
+            'class': 'age-input'
+        })
+    )
