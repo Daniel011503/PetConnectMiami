@@ -1,0 +1,66 @@
+# Django specific
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+*.so
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.pytest_cache/
+
+# Database files
+*.sqlite3
+db.sqlite3
+
+# Media files (uploaded content)
+media/
+/media/
+
+# Environment variables and secrets
+.env
+*.env
+.env.local
+.env.production
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Django migrations (optional - some keep these)
+# */migrations/*.py
+# !*/migrations/__init__.py
+
+# Static files (when collected)
+staticfiles/
+static_root/
+
+# Logs
+*.log
+logs/
+
+# Secret key and sensitive settings
+local_settings.py
