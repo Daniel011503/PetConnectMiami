@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-8b#c$(39=*^zoh26+3xw*samu)h%si)a$_!%ajq)8n4j&#&tw(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.1.225']
 
 
 # Application definition
@@ -37,13 +37,59 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
+    'rest_framework',
+    'rest_framework.authtoken',
     'crispy_forms',
     'crispy_bootstrap4',
     'pets',
     'accounts',
 ]
 
+# REST Framework configuration
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',  # Changed from IsAuthenticated to AllowAny
+    ],
+}
+
+# CORS settings
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://192.168.1.225:3000",
+    "exp://192.168.1.225:8081",  # Expo development server
+    "exp://localhost:8081",
+]
+
+CORS_ALLOW_ALL_ORIGINS = True  # For development only - remove in production
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+# CSRF settings for API
+CSRF_TRUSTED_ORIGINS = [
+    "http://192.168.1.225:8000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

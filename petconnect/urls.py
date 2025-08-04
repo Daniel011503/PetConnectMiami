@@ -21,8 +21,11 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('pets/', include('pets.urls')),
-    path('accounts/', include('accounts.urls')),
+    path('pets/', include('pets.urls')),           # Your existing web pages
+    path('accounts/', include('accounts.urls')),   # Your existing auth pages
+    path('api/', include('pets.api_urls')),        # Pet API endpoints
+    path('api/auth/', include('accounts.api_urls')),  # Authentication API endpoints
+    path('api/drf-auth/', include('rest_framework.urls')),  # DRF auth endpoints
 ]
 
 if settings.DEBUG:
