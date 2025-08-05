@@ -1,13 +1,12 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  ScrollView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function TestConnectionScreen() {
   const [results, setResults] = useState<string[]>([]);
