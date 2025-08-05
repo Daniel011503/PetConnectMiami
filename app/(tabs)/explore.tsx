@@ -1,110 +1,369 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Alert, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+interface Pet {
+  id: number;
+  name: string;
+  breed: string;
+  age: number;
+  description: string;
+  photo: string | null;
+  owner: {
+    id: number;
+    username: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+  };
+}
 
-export default function TabTwoScreen() {
+export default function ExploreScreen() {
+  const [pets, setPets] = useState<Pet[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<{ id: number; username: string } | null>(null);
+
+  useEffect(() => {
+    fetchPets();
+    getCurrentUser();
+  }, []);
+
+  const getCurrentUser = async () => {
+    try {
+      const token = await AsyncStorage.getItem('authToken');
+      if (token) {
+        const response = await fetch('http://192.168.1.225:8000/api/profile/', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Token ${token}`,
+            'Accept': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const userData = await response.json();
+          setCurrentUser(userData);
+        }
+      }
+    } catch (error) {
+      console.error('Error getting user info:', error);
+    }
+  };
+
+  // Refresh pets when screen comes into focus (e.g., returning from add pet screen)
+  useFocusEffect(
+    useCallback(() => {
+      fetchPets();
+    }, [])
+  );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchPets();
+    setRefreshing(false);
+  }, []);
+
+  const fetchPets = async (): Promise<void> => {
+    try {
+      console.log('Fetching pets from API...');
+      const response = await fetch('http://192.168.1.225:8000/api/pets/search/', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
+      const responseText = await response.text();
+      console.log('Response text:', responseText);
+      
+      if (response.ok) {
+        const data: Pet[] = JSON.parse(responseText);
+        console.log('Parsed data:', data);
+        setPets(data);
+      } else {
+        console.error('API Error:', responseText);
+        console.error('Response status:', response.status);
+        console.error('Response statusText:', response.statusText);
+        setPets([]); // Set empty array on error
+      }
+      
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching pets:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
+      setPets([]); // Set empty array on error
+      setLoading(false);
+    }
+  };
+
+  const navigateToPetDetail = (petId: number) => {
+    router.push({
+      pathname: '/pet/[id]',
+      params: { id: petId.toString() }
+    });
+  };
+
+  const deletePet = async (petId: number, petName: string) => {
+    Alert.alert(
+      'Delete Pet',
+      `Are you sure you want to delete ${petName}? This action cannot be undone.`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem('authToken');
+              const response = await fetch(`http://192.168.1.225:8000/api/pets/delete/${petId}/`, {
+                method: 'DELETE',
+                headers: {
+                  'Authorization': `Token ${token}`,
+                  'Accept': 'application/json',
+                },
+              });
+
+              if (response.ok) {
+                Alert.alert('Success', 'Pet deleted successfully');
+                fetchPets(); // Refresh the list
+              } else {
+                const errorData = await response.json();
+                Alert.alert('Error', errorData.error || 'Failed to delete pet');
+              }
+            } catch (error) {
+              Alert.alert('Error', 'Network error. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.loadingText}>Loading pets...</Text>
+      </View>
+    );
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <ScrollView 
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#74B9FF']}
+            tintColor={'#74B9FF'}
+          />
+        }
+      >
+        <Text style={styles.title}>Explore Pets</Text>
+        {pets.length === 0 ? (
+          <View style={styles.noPetsContainer}>
+            <Text style={styles.noPetsText}>No pets found. Please check your connection or try again later.</Text>
+          </View>
+        ) : (
+          pets.map((pet: Pet) => (
+            <View key={pet.id} style={styles.petCard}>
+              <Text style={styles.petName}>{pet.name}</Text>
+              <Text style={styles.petBreed}>{pet.breed}</Text>
+              <Text style={styles.petAge}>Age: {pet.age} years</Text>
+              <Text style={styles.petDescription} numberOfLines={2}>
+                {pet.description}
+              </Text>
+              <Text style={styles.petOwner}>Owner: {pet.owner.username}</Text>
+              
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity 
+                  style={styles.detailsButton} 
+                  onPress={() => navigateToPetDetail(pet.id)}
+                >
+                  <Text style={styles.detailsButtonText}>View Details →</Text>
+                </TouchableOpacity>
+                
+                {/* Show delete button only for pets owned by current user */}
+                {currentUser && pet.owner.id === currentUser.id && (
+                  <TouchableOpacity 
+                    style={styles.deleteButton} 
+                    onPress={() => deletePet(pet.id, pet.name)}
+                  >
+                    <Text style={styles.deleteButtonText}>🗑️</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          ))
+        )}
+      </ScrollView>
+      
+      {/* Floating Action Button */}
+      <TouchableOpacity 
+        style={styles.fab}
+        onPress={() => router.push('/add-pet-simple')}
+      >
+        <Text style={styles.fabText}>+</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    backgroundColor: '#FFF8F0',
   },
-  titleContainer: {
+  scrollContent: {
+    padding: 20,
+    paddingTop: 50,
+    paddingBottom: 100, // Extra space at bottom to ensure last item is visible
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#74B9FF',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  loadingText: {
+    textAlign: 'center',
+    fontSize: 18,
+    color: '#74B9FF',
+    marginTop: 100,
+  },
+  noPetsContainer: {
+    alignItems: 'center',
+    marginTop: 50,
+    padding: 20,
+  },
+  noPetsText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#FF6B6B',
+    fontStyle: 'italic',
+  },
+  petCard: {
+    backgroundColor: 'white',
+    padding: 15,
+    marginBottom: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#A2D2FF',
+  },
+  petName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#74B9FF',
+    marginBottom: 5,
+  },
+  petBreed: {
+    fontSize: 16,
+    color: '#34495E',
+    fontStyle: 'italic',
+    marginBottom: 5,
+  },
+  petAge: {
+    fontSize: 14,
+    color: '#FF6B6B',
+    marginBottom: 5,
+  },
+  petDescription: {
+    fontSize: 14,
+    color: '#2D3436',
+    marginBottom: 5,
+  },
+  petOwner: {
+    fontSize: 12,
+    color: '#34495E',
+    backgroundColor: '#B2F7EF',
+    padding: 5,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginBottom: 10,
+  },
+  detailsButton: {
+    backgroundColor: '#74B9FF',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 10,
+    flex: 1,
+    marginRight: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  detailsButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  buttonContainer: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  deleteButton: {
+    backgroundColor: '#FF6B6B',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 10,
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  deleteButtonText: {
+    fontSize: 18,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 100,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#74B9FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 8,
+  },
+  fabText: {
+    fontSize: 24,
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
