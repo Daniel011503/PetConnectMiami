@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pet Connect Miami</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            background-color: #FFF8F0; 
+            color: #2D3436; 
+        }
+        h1 { 
+            color: #74B9FF; 
+            text-align: center; 
+            margin-bottom: 30px; 
+        }
+        .pet-card { 
+            border: 1px solid #A2D2FF; 
+            padding: 20px; 
+            margin: 20px 0; 
+            border-radius: 12px; 
+            background: white;
+            box-shadow: 0 2px 8px rgba(116, 185, 255, 0.1);
+        }
+        .pet-name { 
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #74B9FF; 
+            margin-bottom: 8px;
+        }
+        .pet-name a {
+            text-decoration: none; 
+            color: #74B9FF;
+        }
+        .pet-name a:hover {
+            color: #FF9F80;
+        }
+        .pet-breed { 
+            color: #34495E; 
+            font-style: italic; 
+            font-size: 16px;
+        }
+        .pet-age { 
+            color: #FF6B6B; 
+            font-weight: 500;
+            margin: 10px 0;
+        }
+        .pet-card p {
+            color: #2D3436;
+            line-height: 1.5;
+        }
+        .pet-card small {
+            color: #34495E;
+            background: #B2F7EF;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        .search-input, .age-input {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #A2D2FF;
+        border-radius: 6px;
+        font-size: 16px;
+        box-sizing: border-box;
+        }
+
+        .search-input:focus, .age-input:focus {
+        border-color: #74B9FF;
+        outline: none;
+    }
+    </style>
+</head>
+<body>
+    <!-- User info header -->
+    <div style="background: #74B9FF; color: white; padding: 10px 40px; margin: -40px -40px 40px -40px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            {% if user.is_authenticated %}
+                <span>Welcome, <strong>{{ user.username }}</strong>!</span>
+            {% else %}
+                <span>Welcome to Pet Connect Miami</span>
+            {% endif %}
+        </div>
+        <div>
+            {% if user.is_authenticated %}
+                <a href="/accounts/profile/" style="color: white; text-decoration: none; margin-right: 15px;">Account Settings</a>
+                <form method="post" action="/accounts/logout/" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" style="background: none; border: none; color: white; text-decoration: none; cursor: pointer; font-size: inherit; font-family: inherit;">Logout</button>
+                </form>
+            {% else %}
+                <a href="/accounts/signup/" style="color: white; text-decoration: none; margin-right: 15px;">Sign Up</a>
+                <a href="/accounts/login/" style="color: white; text-decoration: none;">Login</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Rest of your existing content -->
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="margin-bottom: 20px;">Pet Connect Miami - All Pets</h1>
+        <a href="/pets/add/" style="background: #FF9F80; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; margin-bottom: 20px;">+ Add Your Pet</a>
+        
+        <!-- Search Form -->
+        <div style="max-width: 600px; margin: 20px auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(116, 185, 255, 0.1); border: 1px solid #A2D2FF;">
+            <form method="GET" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: end;">
+                <div style="flex: 2; min-width: 200px;">
+                    {{ search_form.search }}
+                </div>
+                <div style="flex: 1; min-width: 80px;">
+                    {{ search_form.age_min }}
+                </div>
+                <div style="flex: 1; min-width: 80px;">
+                    {{ search_form.age_max }}
+                </div>
+                <button type="submit" style="background: #74B9FF; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer;">Search</button>
+                <a href="/pets/" style="background: #B2F7EF; color: #2D3436; padding: 10px 15px; text-decoration: none; border-radius: 6px;">Clear</a>
+            </form>
+        </div>
+    </div>
+
+    {% for pet in pets %}
+        <div class="pet-card">
+            {% if pet.photo %}
+                <img src="{{ pet.photo.url }}" alt="{{ pet.name }}" style="width: 150px; height: 150px; object-fit: cover; border-radius: 12px; float: right; margin-left: 20px;">
+            {% endif %}
+            <div class="pet-name"><a href="/pets/{{ pet.id }}/" style="text-decoration: none; color: #74B9FF;">{{ pet.name }}</a></div>
+            <div class="pet-breed">{{ pet.breed }}</div>
+            <div class="pet-age">Age: {{ pet.age }} years old</div>
+            <p>{{ pet.description }}</p>
+            <small>Owner: {{ pet.owner.username }}</small>
+        </div>
+    {% empty %}
+        <p>No pets found!</p>
+    {% endfor %}
+</body>
+</html>

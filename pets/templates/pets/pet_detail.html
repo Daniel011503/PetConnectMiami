@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ pet.name }} - Pet Connect Miami</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            background-color: #FFF8F0; 
+            color: #2D3436;
+        }
+        .pet-profile { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 16px rgba(116, 185, 255, 0.15); 
+            max-width: 600px; 
+            border: 2px solid #A2D2FF;
+        }
+        .pet-name { 
+            font-size: 36px; 
+            font-weight: bold; 
+            color: #74B9FF; 
+            margin-bottom: 10px; 
+        }
+        .pet-breed { 
+            font-size: 20px; 
+            color: #34495E; 
+            font-style: italic; 
+            margin-bottom: 20px; 
+        }
+        .pet-info { 
+            margin: 20px 0; 
+            font-size: 18px;
+        }
+        .info-label { 
+            font-weight: bold; 
+            color: #FF6B6B; 
+        }
+        .description { 
+            background: #F5F5F5; 
+            padding: 20px; 
+            border-radius: 12px; 
+            margin: 20px 0; 
+            border-left: 4px solid #B2F7EF;
+        }
+        .back-link { 
+            color: #74B9FF; 
+            text-decoration: none; 
+            margin-bottom: 20px; 
+            display: inline-block; 
+            font-weight: 500;
+            padding: 8px 16px;
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #A2D2FF;
+        }
+        .back-link:hover { 
+            background: #74B9FF;
+            color: white;
+        }
+        .owner-info { 
+            color: #34495E; 
+            margin-top: 20px; 
+            padding-top: 20px; 
+            border-top: 2px solid #DCC6E0; 
+        }
+        .owner-info strong {
+            color: #FF9F80;
+        }
+    </style>
+</head>
+<body>
+    <a href="/pets/" class="back-link">← Back to All Pets</a>
+    
+    <div class="pet-profile">
+        {% if pet.photo %}
+            <img src="{{ pet.photo.url }}" alt="{{ pet.name }}" style="width: 200px; height: 200px; object-fit: cover; border-radius: 16px; float: right; margin-left: 30px; margin-bottom: 20px; border: 3px solid #A2D2FF;">
+        {% endif %}
+        <div class="pet-name">{{ pet.name }}</div>
+        <div class="pet-breed">{{ pet.breed }}</div>
+        
+        <div class="pet-info">
+            <span class="info-label">Age:</span> {{ pet.age }} years old
+        </div>
+        
+        <div class="description">
+            <strong>About {{ pet.name }}:</strong><br>
+            {{ pet.description }}
+        </div>
+        
+        <div class="owner-info">
+            <strong>Owner:</strong> {{ pet.owner.username }}
+        </div>
+    </div>
+</body>
+</html>

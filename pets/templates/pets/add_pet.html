@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Your Pet - Pet Connect Miami</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            background-color: #FFF8F0; 
+            color: #2D3436;
+        }
+        .add-pet-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(116, 185, 255, 0.15);
+            border: 2px solid #A2D2FF;
+        }
+        h2 {
+            color: #74B9FF;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            color: #34495E;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        input[type="text"], input[type="number"], textarea, input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #A2D2FF;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input:focus, textarea:focus {
+            border-color: #74B9FF;
+            outline: none;
+        }
+        textarea {
+            resize: vertical;
+        }
+        button {
+            background: #74B9FF;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #FF9F80;
+        }
+        .back-link {
+            color: #74B9FF;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .back-link:hover {
+            color: #FF9F80;
+        }
+    </style>
+</head>
+<body>
+    <a href="/pets/" class="back-link">← Back to All Pets</a>
+    
+    <div class="add-pet-container">
+        <h2>Add Your Pet</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">Pet's Name:</label>
+                {{ form.name }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.breed.id_for_label }}">Breed:</label>
+                {{ form.breed }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.age.id_for_label }}">Age (years):</label>
+                {{ form.age }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">About Your Pet:</label>
+                {{ form.description }}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.photo.id_for_label }}">Photo:</label>
+                {{ form.photo }}
+            </div>
+            
+            <button type="submit">Add My Pet</button>
+        </form>
+    </div>
+</body>
+</html>
